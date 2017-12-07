@@ -1,0 +1,215 @@
+#Requires -Version 2.0
+
+<#
+    .SYNOPSIS
+        Downloads, unpacks, and prepares a portable
+        Java development environment.
+        Big thanks to https://github.com/toksaitov/AndroidStudioPortable
+ #>
+
+#
+# Definitions
+#
+
+. '.\Definitions.ps1'
+
+#
+# Helpers
+#
+
+. '.\Helpers.ps1'
+
+#
+# Steps
+#
+
+#
+# Download and unpack lessmsi to be able to unpack
+# a 7-Zip installer later.
+#
+
+$ToolsAreRequired = !(Test-Path -Path $OracleJDKDirectory)
+
+if ($ToolsAreRequired -And !(Test-Path -Path $LessMSIDirectory))
+{
+    if (!(Test-Path -Path $LessMSIArchive))
+    {
+        Write-Output "Get LessMSI"
+        Invoke-WebRequest -Uri $LessMSIURL -OutFile $LessMSIArchive
+    }
+    Write-Output "Expand LessMSI"
+    Expand-Archive -Path $LessMSIArchive
+}
+
+#
+# Download and unpack the 7-Zip installer.
+#
+
+if ($ToolsAreRequired -And !(Test-Path -Path $7zDirectory))
+{
+    if (!(Test-Path -Path $7zInstaller))
+    {
+        Write-Output "Get 7-Zip"
+        Invoke-WebRequest -Uri $7zURL -OutFile $7zInstaller
+    }
+
+    Write-Output "Use LessMSI to unpack 7zip"
+    & ".\$LessMSIDirectory\$LessMSIExecutable" 'x' $7zInstaller
+}
+
+#
+# Download and unpack an Oracle JDK installer without administrative rights.
+#
+
+if (!(Test-Path -Path $OracleJDKDirectory))
+{
+    if (!(Test-Path -Path $OracleJDKInternalArchive))
+    {
+        if (!(Test-Path -Path $OracleJDKInternalCAB))
+        {
+            if (!(Test-Path -Path $OracleJDKInstaller))
+            {
+                #
+                # Download the Oracle JDK installer accepting the
+                #
+                #     `Oracle Binary Code License Agreement for Java SE`
+                #
+
+                $Cookies =
+                    New-Object -TypeName 'System.Net.CookieContainer'
+
+                $Cookie =
+                    New-Object -TypeName 'System.Net.Cookie'
+                $Cookie.Name =
+                    'gpw_e24'
+                $Cookie.Value =
+                    'http%3A%2F%2Fwww.oracle.com%2F'
+                $Cookie.Domain =
+                    '.oracle.com'
+                $Cookies.Add($Cookie)
+
+                $Cookie =
+                    New-Object -TypeName 'System.Net.Cookie'
+                $Cookie.Name =
+                    'oraclelicense'
+                $Cookie.Value =
+                    'accept-securebackup-cookie'
+                $Cookie.Domain =
+                    '.oracle.com'
+                $Cookies.Add($Cookie)
+
+                $InvokeWebRequestParameters = @{
+                    Uri = $OracleJDKURL;
+                    OutFile = $OracleJDKInstaller;
+                    Cookies = $Cookies;
+                }
+                Write-Output "Download Java JDK $OracleJDK"
+                Invoke-WebRequestWithCookies @InvokeWebRequestParameters
+            }
+
+            #
+            # Unpack the Oracle JDK installer with 7-Zip.
+            #
+
+            Write-Output "Unpack JDK installer"
+            & ".\$7zDirectory\$7zExecutable"                      `
+                'e' $OracleJDKInstaller                           `
+                "$OracleJDKInternalCABPath\$OracleJDKInternalCAB" `
+                '-y'
+        }
+
+        #
+        # Unpack the Oracle JDK Tools CAB with 7-Zip.
+        #
+
+        Write-Output "Unpack JDK archive"
+        & ".\$7zDirectory\$7zExecutable"     `
+            'e' $OracleJDKInternalCAB        `
+            "$OracleJDKInternalArchive" '-y'
+    }
+
+    Write-Output "Unpack JDK"
+    & ".\$7zDirectory\$7zExecutable" 'x' $OracleJDKInternalArchive `
+                                     "-o$OracleJDKDirectory" '-y'
+}
+
+#
+# Unpack Oracle JDK `.pack` files with the unpack200
+# utility bundled with the JDK.
+#
+
+Write-Output "Expand JDK files"
+$GetChildItemParameters = @{
+    Path = $OracleJDKDirectory;
+    Filter = '*.pack';
+}
+$PackFiles =
+    Get-ChildItem @GetChildItemParameters -Recurse
+
+if ($PackFiles)
+{
+    foreach ($File in $PackFiles)
+    {
+        $PackFileName =
+            $File.FullName
+        $JarFileName =
+            "$($File.DirectoryName)\$($File.BaseName).jar"
+
+        & "$OracleJDKBinariesDirectory\unpack200" '-r' `
+            $PackFileName $JarFileName
+    }
+}
+
+#
+# Remove temporary files.
+#
+$LessMSIRootDirectory =
+    Get-RelativeRootDirectory -RelativePath $LessMSIDirectory
+$7zRootDirectory =
+    Get-RelativeRootDirectory -RelativePath $7zDirectory
+
+$TemporaryFiles = @(
+    $LessMSIArchive,
+    $LessMSIRootDirectory,
+    $7zInstaller,
+    $7zRootDirectory,
+    $OracleJDKInstaller,
+    $OracleJDKInternalCAB,
+    $OracleJDKInternalArchive
+)
+
+$RemoveItemParameters = @{
+    Path = $TemporaryFiles;
+    ErrorAction = 'SilentlyContinue';
+}
+Remove-Item @RemoveItemParameters -Recurse -Force
+
+#
+# Generate a batch file to create env variables JDK.
+#
+
+$BatchContent = @"
+@echo off
+REM
+REM Create temporary environment variables for JDK.
+REM
+REM This file is automatically generated. Please, do not edit this file.
+REM
+
+SET JAVA_HOME=%~dp0$OracleJDKDirectory
+SET PATH=%~dp0$OracleJDKBinariesDirectory;%PATH%
+
+"@
+
+$NewItemParameters = @{
+    Path = './start.bat';
+    Type = 'File';
+    Value = $BatchContent;
+}
+New-Item @NewItemParameters -Force
+
+#
+# The end.
+#
+
+Write-Output "`nDone."
