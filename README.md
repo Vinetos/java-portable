@@ -1,5 +1,5 @@
-# JDK Portable
-Install and run a portable version of the JDK without admin rights on Windows.
+# Java Portable (JDK and JRE)
+Install and run a portable version of the JDK and JRE without admin rights on Windows.
 
 # Prerequisite
  - Windows 7 and higher
