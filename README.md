@@ -16,7 +16,7 @@ Install a **portable version** of the JDK (and bundled JRE) and **run it everywh
 # Installation
 Before run, make sure that you have **an active internet connection**.
 
-Run ``Setup.ps1`` with **powershell** to download, create and setup the jdk flies.
+Run ``Setup.ps1`` with **powershell** to download, create and setup the jdk files.
 
 # Run everywhere
 Once you have done the installation,  
