@@ -5,8 +5,9 @@ Install a **portable version** of the JDK (and bundled JRE) and **run it everywh
 
 ### You can: 
 * **Install the JDK (+ JRE)** on a removable device (like USB key).
-* **Run and compile** application on every computer which can run Java.
-* **Works without internet** (only setup need an internet connection).
+* **Run and compile** application on every computer which can run Java.  
+
+**Works without internet** (only setup need an internet connection).
 
 # Prerequisite
  - **Windows 7 and higher**.
