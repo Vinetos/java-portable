@@ -58,6 +58,19 @@ if ($ToolsAreRequired -And !(Test-Path -Path $7zDirectory))
 }
 
 #
+# Check the architecture of the OS and change to 64bit if necessary.
+#
+
+if ([System.Environment]::Is64BitProcess) {
+	Write-Output "Detected 64bit OS, switching...";
+	$OracleJDK = $OracleJDK64;
+	$OracleJDKInstaller = $OracleJDKInstaller64;
+	$OracleJDKURL = $OracleJDKURL64;
+	$OracleJDKDirectory = $OracleJDKDirectory64;
+	$OracleJDKBinariesDirectory = $OracleJDKBinariesDirectory64;
+}
+
+#
 # Download and unpack an Oracle JDK installer without administrative rights.
 #
 
@@ -67,6 +80,7 @@ if (!(Test-Path -Path $OracleJDKDirectory))
     {
         if (!(Test-Path -Path $OracleJDKInternalCAB))
         {
+
             if (!(Test-Path -Path $OracleJDKInstaller))
             {
                 #
@@ -75,36 +89,11 @@ if (!(Test-Path -Path $OracleJDKDirectory))
                 #     `Oracle Binary Code License Agreement for Java SE`
                 #
 
-                $Cookies =
-                    New-Object -TypeName 'System.Net.CookieContainer'
 
-                $Cookie =
-                    New-Object -TypeName 'System.Net.Cookie'
-                $Cookie.Name =
-                    'gpw_e24'
-                $Cookie.Value =
-                    'http%3A%2F%2Fwww.oracle.com%2F'
-                $Cookie.Domain =
-                    '.oracle.com'
-                $Cookies.Add($Cookie)
-
-                $Cookie =
-                    New-Object -TypeName 'System.Net.Cookie'
-                $Cookie.Name =
-                    'oraclelicense'
-                $Cookie.Value =
-                    'accept-securebackup-cookie'
-                $Cookie.Domain =
-                    '.oracle.com'
-                $Cookies.Add($Cookie)
-
-                $InvokeWebRequestParameters = @{
-                    Uri = $OracleJDKURL;
-                    OutFile = $OracleJDKInstaller;
-                    Cookies = $Cookies;
-                }
+				$Url = $OracleJDKURL;
+				$OutFile = $OracleJDKInstaller;
                 Write-Output "Download Java JDK $OracleJDK"
-                Invoke-WebRequestWithCookies @InvokeWebRequestParameters
+				Invoke-WebRequest -Uri $Url -OutFile $OutFile -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox
             }
 
             #
@@ -198,7 +187,7 @@ REM
 
 
 SETX JAVA_HOME %~dp0$OracleJDKDirectory
-for /f "skip=2 tokens=3*" %a in ('reg query HKCU\Environment /v PATH') do @if [%b]==[] ( @setx PATH "%~a;%JAVA_HOME\bin" ) else ( @setx PATH "%~a %~b;%JAVA_HOME\bin" )
+for /f "skip=2 tokens=3*" %%1 in ('reg query HKCU\Environment /v PATH') do @if [%%2]==[] ( @setx PATH "%%~1;%JAVA_HOME\bin" ) else ( @setx PATH "%%~1 %%~2;%JAVA_HOME\bin" )
 
 "@
 
