@@ -11,14 +11,22 @@
 # Oracle JDK archive
 # See https://www.whitebyte.info/programming/java/how-to-install-a-portable-jdk-in-windows-without-admin-rights
 # 
-$OracleJDK = 'jdk-8u151-windows-x64'
+# For 32bit Windows
+$OracleJDK = 'jdk-8u161-windows-i586'
 $OracleJDKInstaller = "$OracleJDK.exe"
-$OracleJDKURL ="http://download.oracle.com/otn-pub/java/jdk/8u151-b12/e758a0de34e24606bca991d704f6dcbf/$OracleJDKInstaller"
+$OracleJDKURL ="https://downloads.sourceforge.net/portableapps/$OracleJDKInstaller"
+$OracleJDKDirectory =".\$OracleJDK"
+$OracleJDKBinariesDirectory ="$OracleJDKDirectory\bin"
+# For 64bit Windows
+$OracleJDK64 = 'jdk-8u161-windows-x64'
+$OracleJDKInstaller64 = "$OracleJDK64.exe"
+$OracleJDKURL64 ="https://downloads.sourceforge.net/portableapps/$OracleJDKInstaller64"
+$OracleJDKDirectory64 =".\$OracleJDK64"
+$OracleJDKBinariesDirectory64 ="$OracleJDKDirectory64\bin"
+
 $OracleJDKInternalCABPath = '.rsrc\1033\JAVA_CAB10'
 $OracleJDKInternalCAB = '111'
 $OracleJDKInternalArchive ='tools.zip'
-$OracleJDKDirectory =".\$OracleJDK"
-$OracleJDKBinariesDirectory ="$OracleJDKDirectory\bin"
 
 #
 # LessMSI to unpack 7zip portable
@@ -30,10 +38,10 @@ $LessMSIDirectory = ".\$LessMSI"
 $LessMSIExecutable ='lessmsi.exe'
 
 #
-# 7zip portable to extract and setup jdk archive
+# 7zip portable to extract and setup JDK archive
 #
-$7z = '7z1602-x64'
+$7z = '7z2201-x64'
 $7zInstaller = "$7z.msi"
-$7zURL = "http://d.7-zip.org/a/$7zInstaller"
+$7zURL = "https://cfhcable.dl.sourceforge.net/project/sevenzip/7-Zip/22.01/$7zInstaller"
 $7zDirectory = ".\$7z\SourceDir\Files\7-Zip"
 $7zExecutable = '7z.exe'
