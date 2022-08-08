@@ -32,8 +32,8 @@ $LessMSIExecutable ='lessmsi.exe'
 #
 # 7zip portable to extract and setup jdk archive
 #
-$7z = '7z1602-x64'
+$7z = '7z2201-x64'
 $7zInstaller = "$7z.msi"
-$7zURL = "http://d.7-zip.org/a/$7zInstaller"
+$7zURL = "https://cfhcable.dl.sourceforge.net/project/sevenzip/7-Zip/22.01/$7zInstaller"
 $7zDirectory = ".\$7z\SourceDir\Files\7-Zip"
 $7zExecutable = '7z.exe'
