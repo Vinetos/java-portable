@@ -12,13 +12,13 @@
 # See https://www.whitebyte.info/programming/java/how-to-install-a-portable-jdk-in-windows-without-admin-rights
 # 
 # For 32bit Windows
-$OracleJDK = 'jdk-8u161-windows-i586'
+$OracleJDK = 'jdk-8u341-windows-i586'
 $OracleJDKInstaller = "$OracleJDK.exe"
 $OracleJDKURL ="https://downloads.sourceforge.net/portableapps/$OracleJDKInstaller"
 $OracleJDKDirectory =".\$OracleJDK"
 $OracleJDKBinariesDirectory ="$OracleJDKDirectory\bin"
 # For 64bit Windows
-$OracleJDK64 = 'jdk-8u161-windows-x64'
+$OracleJDK64 = 'jdk-8u341-windows-x64'
 $OracleJDKInstaller64 = "$OracleJDK64.exe"
 $OracleJDKURL64 ="https://downloads.sourceforge.net/portableapps/$OracleJDKInstaller64"
 $OracleJDKDirectory64 =".\$OracleJDK64"
